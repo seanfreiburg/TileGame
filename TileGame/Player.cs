@@ -7,34 +7,56 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Content;
+using TileGame.Interfaces;
+using TileGame.Lib;
 
 namespace TileGame
 {
-    class Player
+    class Player : IDrawableObject, IFocusable
     {
-        // Animation representing the player
 
         public Texture2D PlayerTexture;
-        public Vector2 Position;
+        public Vector2 Position { get; set; }
         public int Width = 64;
         public int Height = 64;
         private Map Map;
 
-        public void Initialize(Texture2D texture, Vector2 position, Map map)
+        public Player()
         {
-            PlayerTexture = texture;
-            Position = position;
+            Position = new Vector2(512, 512);
+            
+        }
+
+        public void Initialize(Map map)
+        {
             this.Map = map;
         }
 
-        public void Update()
+        public void Update(GameTime gameTime)
         {
             MovePlayer();
+        }
+
+        public void LoadContent(GraphicsDevice graphicsDevice, ContentManager content)
+        {
+            PlayerTexture = content.Load<Texture2D>("bin\\Windows\\Graphics\\player");
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(PlayerTexture, Position, null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+
+            // mouse cursor
+            MouseState mouseState = Mouse.GetState();
+            Vector2 mousePosition = mouseState.Position.ToVector2();
+            spriteBatch.Draw(PlayerTexture, mousePosition, null, Color.White, 0f, Vector2.Zero, .2f, SpriteEffects.None, 0f);
+
+        }
+
+        public void UnloadContent()
+        {
+
         }
 
         private bool isCollidingWithTiles(int playerX, int playerY)
@@ -62,19 +84,19 @@ namespace TileGame
         {
             if (Keyboard.GetState().IsKeyDown(Keys.Down) || Keyboard.GetState().IsKeyDown(Keys.S) && !isCollidingWithTiles((int)Position.X, (int)Position.Y + 2))
             {
-                Position.Y = Position.Y + 2;
+                Position = new Vector2(Position.X, Position.Y + 2);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.Up) || Keyboard.GetState().IsKeyDown(Keys.W) && !isCollidingWithTiles((int)Position.X, (int)Position.Y - 2))
             {
-                Position.Y = Position.Y - 2;
+                Position = new Vector2(Position.X, Position.Y - 2);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.Left) || Keyboard.GetState().IsKeyDown(Keys.A) && !isCollidingWithTiles((int)Position.X - 2, (int)Position.Y))
             {
-                Position.X = Position.X - 2;
+                Position = new Vector2(Position.X -2, Position.Y);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.Right) || Keyboard.GetState().IsKeyDown(Keys.D) && !isCollidingWithTiles((int)Position.X + 2, (int)Position.Y))
             {
-                Position.X = Position.X + 2;
+                Position = new Vector2(Position.X + 2, Position.Y);
             }
         }
     }

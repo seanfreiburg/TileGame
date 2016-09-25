@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
+using TileGame.Lib;
 
 namespace TileGame
 {
@@ -11,13 +11,13 @@ namespace TileGame
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        Player player;
-        Map map;
-
+        Screen.Screen currentScreen;
+        
         public TileGame()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            currentScreen = new Screen.SplashScreen(this);
         }
 
         /// <summary>
@@ -28,9 +28,7 @@ namespace TileGame
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-            player = new Player();
-            map = new Map();
+            currentScreen.Initialize();
             base.Initialize();
         }
 
@@ -42,15 +40,7 @@ namespace TileGame
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
-            Vector2 playerPosition = new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y + GraphicsDevice.Viewport.TitleSafeArea.Height / 2 +128);
-            Vector2 mapStartPosition = new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y);
-
-           
-            Texture2D[] mapTextures = new Texture2D[] { Content.Load<Texture2D>("bin\\Windows\\Graphics\\tile1"), Content.Load<Texture2D>("bin\\Windows\\Graphics\\tile2") };
-            map.Initialize( mapTextures, mapStartPosition);
-
-            player.Initialize(Content.Load<Texture2D>("bin\\Windows\\Graphics\\player"), playerPosition, map);
+            currentScreen.LoadContent(GraphicsDevice, Content);
         }
 
         /// <summary>
@@ -59,7 +49,7 @@ namespace TileGame
         /// </summary>
         protected override void UnloadContent()
         {
-            // TODO: Unload any non ContentManager content here
+            currentScreen.UnloadContent();
         }
 
         /// <summary>
@@ -69,11 +59,7 @@ namespace TileGame
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            // TODO: Add your update logic here
-            player.Update();
+            currentScreen.Update(gameTime);
             base.Update(gameTime);
         }
 
@@ -84,13 +70,18 @@ namespace TileGame
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            spriteBatch.Begin();
-            map.Draw(spriteBatch);
-            player.Draw(spriteBatch);
-            spriteBatch.End();
-
+            currentScreen.Draw(gameTime, spriteBatch);
             base.Draw(gameTime);
+        }
+
+        
+
+        public void LoadNewScreen(Screen.Screen newScreen)
+        {
+            currentScreen.UnloadContent();
+            currentScreen = newScreen;
+            currentScreen.Initialize();
+            currentScreen.LoadContent(GraphicsDevice, Content);
         }
     }
 }
